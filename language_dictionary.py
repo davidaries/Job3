@@ -33,6 +33,7 @@ english = {
     '~20': 'Submit',
     '~21': 'Male',
     '~22': 'Female',
+
     '~23': 'Role',
     '~24': 'Receptionist',
     '~25': 'Assistant',
@@ -44,6 +45,9 @@ english = {
     '~31': 'Flu Test',
     '~32': 'Coronavirus Test',
     '~33': 'Task',
+    '~34': 'Receive',
+    '~35': 'Room',
+    '~36': 'Diagnose',
     '~101': 'English',
     '~102': 'Spanish'
 }
@@ -76,12 +80,15 @@ spanish = {
     '~25': 'Asistente',
     '~26': 'Doctor',
     '~27': 'Técnico de Laboratorio',
-    '~28': 'Headache',
-    '~29': 'Fever',
+    '~28': 'dolor de cabeza',
+    '~29': 'fiebre',
     '~30': 'COVID',
     '~31': 'Flu Test',
     '~32': 'Coronavirus Test',
     '~33': 'Tarea',
+    '~34': 'Receive',
+    '~35': 'Dar una habitacion',
+    '~36': 'Diagnosticar',
     '~101': 'ingles',
     '~102': 'espanol'
 }

@@ -47,45 +47,51 @@ import language_dictionary as ld
 import data
 from home_screen import home_screen
 
-
-base_language = data.language_preference()
+base_language = data.get_data('language_preference')
 
 root = Tk()
 
-
-"""need to change data.create_fonts to be part of an __init__ method for data"""
 data.create_fonts(root) # data.create_fonts(root) creates the fonts to be used in the program
 
 root.title(ld.get_text_from_dict(base_language, '~11'))  # title for window
 root.geometry('302x100+0+0')  # main window geometry
 
-"""
-time_window = Toplevel(root)
-time_window.title(ld.get_text_from_dict(base_language, '~12'))
-time_window.geometry("200x200+600+0")
-time_now = Label(time_window, text=" ", font=data.get_large_font())
-time_now.pack()
+""""""
+pd = [[111, 2, 3], [111, 4, 5], [222, 6, 7], [222, 8, 9]] # the first field (offset 0) is the person id.
+persons = [111, 222]
+person_dict = {}
 
-in_time.__init__(root, time_now)
-"""
+for p in persons:
+    person_dict[p] = [[pd[1], pd[2]] for pd in pd if pd[0] == p]
+
+print(person_dict.get(111))
+print(person_dict.get(222))
+# TIME WINDOW NOT NEEDED FOR JOB 3
+# time_window = Toplevel(root)
+# time_window.title(ld.get_text_from_dict(base_language, '~12'))
+# time_window.geometry("200x200+600+0")
+# time_now = Label(time_window, text=" ", font=data.get_large_font())
+# time_now.pack()
+#
+# in_time.__init__(root, time_now)
+
 """passes the main program window pointer and label for timer to be used in internal_timer.py"""
 
 # create Log Window
 log_window = Toplevel(root)
 log_window.title(ld.get_text_from_dict(base_language, '~13'))
-log_window.geometry("300x300+1100+0")
-staffers_home = home_screen(root,log_window)
+log_window.geometry("600x300+0+500")
+staffers_home = home_screen(root, log_window)
 staffers_home.manage_staff_main_screen()
-#populate home pages
 
-# creation of labels for the Log Window
+# creation of labels for the Log Window not needed for JOB 3
 logPadding = 25
-label_name = Label(log_window, text=ld.get_text_from_dict(base_language, '~1'), font=data.get_large_font())
-label_name.grid(column=1, row=1, ipadx=logPadding)
-label_event = Label(log_window, text=ld.get_text_from_dict(base_language, '~9'), font=data.get_large_font())
-label_event.grid(column=2, row=1, ipadx=logPadding)
-label_time = Label(log_window, text=ld.get_text_from_dict(base_language, '~10'), font=data.get_large_font())
-label_time.grid(column=3, row=1, ipadx=logPadding)
+# label_name = Label(log_window, text=ld.get_text_from_dict(base_language, '~1'), font=data.get_large_font())
+# label_name.grid(column=1, row=1, ipadx=logPadding)
+# label_event = Label(log_window, text=ld.get_text_from_dict(base_language, '~9'), font=data.get_large_font())
+# label_event.grid(column=2, row=1, ipadx=logPadding)
+# label_time = Label(log_window, text=ld.get_text_from_dict(base_language, '~10'), font=data.get_large_font())
+# label_time.grid(column=3, row=1, ipadx=logPadding)
 
 sm.__init__(root, log_window)
 """passes a reference to the main GUI root and the log window to be used in staff_manager.py"""

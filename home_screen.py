@@ -1,79 +1,69 @@
 from tkinter import *
 import data
-import language_dictionary as ld
+from manage_window import manage_window
 
 
 class home_screen:
+    """The home_screen class is in charge of creating and managing the home screens for the various staffers
+    based on the different kinds of staff windows, the handling of the person populated on their task list
+    will be done based on their job type
+    :param self.main_program: reference to the main tk program used for the creation of additional windows
+    :type self.main_program: tk class
+    :param self.horizontal_spacing: value used to space the windows horizontally across the screen
+    :type self.horizontal_spacing: int
+    :param self.log_window_pointer: pointer to reference the log window which is needed to write data to the log window
+    :type self.log_window_pointer: tk class
+    :param self.column_padding: value used to space out values placed into a window
+    :type self.column_padding: int
+    :param self.row_padding: value used to pad rows to make the spacing between them larger
+    :type self.row_padding: int
+    :param self.row_current: value used to place values in the home screen in the appropriate rows
+    :type self.row_current: int
+    :param self.task_row: value used to increment the current row placement
+    :type self.task_row: int
+    :param self.reception_home: the window that holds a reference to the receptionist's window
+    :type self.reception_home: tk Window
+    :param self.assistant_home: the window that holds a reference to the assistant's window
+    :type self.assistant_home: tk Window
+    :param self.provider_home: the window that holds a reference to the provider's window
+    :type self.provider_home: tk Window
+    :param self.lab_tech_home: the window that holds a reference to the lab tech's window
+    :type self.reception_home: tk Window"""
 
     def __init__(self, master, log_window):
-        self.main_program = master
+        self.root = master
         self.horizontal_spacing = 0
         self.log_window_pointer = log_window
-        self.column_padding= 75
-        self.row_padding =10
-        self.reception_home = self.create_home_screen()
-        self.assistant_home = self.create_home_screen()
-        self.provider_home = self.create_home_screen()
-        self.lab_tech_home = self.create_home_screen()
+        self.column_padding = 80
+        self.row_padding = 12
+        self.row_current = 2
+        self.task_row = 0
+        self.staff_windows = []
 
-    def create_home_screen(self):
-        home = Toplevel(self.main_program)
-        home.geometry("250x300+" + self.horizontal_spacing.__str__() + "+200")
-        self.horizontal_spacing += 260
+    def create_home_screen(self, v):
+        """In charge of the creation of a new window to be displayed on the screen
+        :param v: is a value used for the vertical spacing of the staffers windows in the UI
+        :type v: str
+        :return: a reference to a window so it can be edited in the future
+        :rtype: Window"""
+        home = Toplevel(self.root)
+        home.geometry("260x300+" + self.horizontal_spacing.__str__() + v)
+        self.horizontal_spacing += 270
         return home
 
-    def populate_reception_home(self, staff_id):
-        receptionist = data.get_staff_member(staff_id)
-        language = receptionist[2]
-        self.reception_home.title(ld.get_text_from_dict(language, staff_id))
-        staff_name = Label(self.reception_home, text=receptionist[0], font=data.get_large_font())
-        staff_name.grid(column=0, row=0)
-        self.add_column_headers(language, self.reception_home)
-        """btn_exit = Button(self.reception_home, text=ld.get_text_from_dict(language, '~20'), fg="black", bg="gray",
-                          height=1, width=10)
-        btn_exit.pack(side=BOTTOM)"""
-
-    def populate_assistant_home(self, staff_id):
-        assistant = data.get_staff_member(staff_id)
-        language = assistant[2]
-        self.assistant_home.title(ld.get_text_from_dict(language, staff_id))
-        staff_name = Label(self.assistant_home, text=assistant[0], font=data.get_large_font())
-        staff_name.grid(column=0, row=0)
-        self.add_column_headers(language,self.assistant_home)
-        """btn_exit = Button(self.assistant_home, text=ld.get_text_from_dict(language, '~20'), fg="black", bg="gray",
-                          height=1, width=10)
-        btn_exit.pack(side=BOTTOM)"""
-
-    def populate_provider_home(self, staff_id):
-        provider = data.get_staff_member(staff_id)
-        language = provider[2]
-        self.provider_home.title(ld.get_text_from_dict(language, staff_id))
-        staff_name = Label(self.provider_home, text=provider[0], font=data.get_large_font())
-        staff_name.grid(column=0, row=0)
-        self.add_column_headers(language, self.provider_home)
-        """btn_exit = Button(self.provider_home, text=ld.get_text_from_dict(language, '~20'), fg="black", bg="gray",
-                          height=1, width=10)
-        btn_exit.pack(side=BOTTOM)"""
-
-    def populate_lab_tech_home(self, staff_id):
-        lab_tech = data.get_staff_member(staff_id)
-        language = lab_tech[2]
-        self.lab_tech_home.title(ld.get_text_from_dict(language, staff_id))
-        staff_name = Label(self.lab_tech_home, text=lab_tech[0], font=data.get_large_font())
-        staff_name.grid(column=0, row=0)
-        self.add_column_headers(language, self.lab_tech_home)
-        """btn_exit = Button(self.lab_tech_home, text=ld.get_text_from_dict(language, '~20'), fg="black", bg="gray",
-                          height=1, width=10)
-        btn_exit.pack(side=BOTTOM)"""
-
     def manage_staff_main_screen(self):
-        self.populate_reception_home('~24')
-        self.populate_assistant_home('~25')
-        self.populate_provider_home('~26')
-        self.populate_lab_tech_home('~27')
+        """This method populates the various staff screens, in reference to NOTE 1 above I believe this can be
+        simplified so there are not multiple methods to create the various home screen"""
+        staff_window_ids = data.get_data('staff_device')
+        staffers = data.get_data('staffers')
+        for staff in staffers:
+            for window in staff_window_ids:
+                if not window.get(staff[0]) is None:
+                    device_id = window.get(staff[0])
+            self.staff_windows.append(manage_window(self.create_home_screen('+150'), staff, self.log_window_pointer,
+                                                    device_id, self.root))
 
-    def add_column_headers(self, lang, window):
-        label_name = Label(window, text=ld.get_text_from_dict(lang, '~1'), font=data.medium_font)
-        label_name.grid(column=1, row=2, ipady=self.row_padding)
-        label_event = Label(window, text=ld.get_text_from_dict(lang, '~33'), font=data.get_medium_font())
-        label_event.grid(column=2, row=2, ipadx=self.column_padding, ipady=self.row_padding)
+        for win in self.staff_windows: # makes a call to set the home windows for all of the staffers
+            win.set_home()
+
+
