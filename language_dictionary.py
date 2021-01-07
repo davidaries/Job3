@@ -33,7 +33,6 @@ english = {
     '~20': 'Submit',
     '~21': 'Male',
     '~22': 'Female',
-
     '~23': 'Role',
     '~24': 'Receptionist',
     '~25': 'Assistant',
@@ -48,6 +47,10 @@ english = {
     '~34': 'Receive',
     '~35': 'Room',
     '~36': 'Diagnose',
+    '~37': 'Pneumonia',
+    '~38': 'Appendicitis',
+    '~39': 'Cholelithiasis',
+    '~100': 'Language Preference',
     '~101': 'English',
     '~102': 'Spanish'
 }
@@ -89,6 +92,10 @@ spanish = {
     '~34': 'Receive',
     '~35': 'Dar una habitacion',
     '~36': 'Diagnosticar',
+    '~37': 'Neumonía',
+    '~38': 'Apendicitis',
+    '~39': 'Colelitiasis',
+    '~100': 'Preferencia de idioma',
     '~101': 'ingles',
     '~102': 'espanol'
 }

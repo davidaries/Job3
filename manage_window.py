@@ -2,7 +2,8 @@ from tkinter import *
 import language_dictionary as ld
 import data
 import datetime
-
+import home_screen
+import PEv1_data as pe_data
 
 class manage_window:
     """
@@ -40,13 +41,14 @@ class manage_window:
     :type self.at_home: bool
     """
 
-    def __init__(self, window, staffer, log, device_id, root):
+    def __init__(self, window, staffer, log, device_id, root, home):
         self.root = root
+        self.home = home
         self.log_window = log
         self.window = window
-        self.staff_name = staffer[0]
-        self.staff_id = staffer[1]
-        self.language = staffer[2]
+        self.staff_name = staffer.get('~1')
+        self.staff_id = staffer.get('~23')
+        self.language = staffer.get('~100')
         self.device_id = device_id
         self.column_padding = 80
         self.row_padding = 12
@@ -58,22 +60,65 @@ class manage_window:
         self.token_list = []
         self.at_home = True
 
-    def poll_peo_q(self):
-        """This function polls for data from peo_q and populates the staffer's home screen with the name of the
-        person and the task they must complete.  This function calls itself every 10 seconds to see if there is
-        new data in peo_q.
-        """
-        poll_data = data.get_data('peo_q', 0, self.device_id)
-        for process in poll_data:
-            person_id = process[2]
-            task_id = process[12]
-            task_window_info = process[14]
-            token = process[1]
-            # if self.at_home and not self.token_list.__contains__(token):   FOR USE WITH POLLING EVERY 10 SECONDS
-            # self.token_list.append(token) FOR POLLING
+    def get_device_id(self):
+        return self.device_id
+
+    # def poll_peo_q(self):
+    #     """This function polls for data from peo_q and populates the staffer's home screen with the name of the
+    #     person and the task they must complete.  This function calls itself every 10 seconds to see if there is
+    #     new data in peo_q.
+    #     """
+    #     poll_data = data.get_data('peo_q', 0, self.device_id)
+    #     for process in poll_data:
+    #         person_id = process[2]
+    #         task_id = process[12]
+    #         task_window_info = process[14]
+    #         token = process[1]
+    #         # if self.at_home and not self.token_list.__contains__(token):   FOR USE WITH POLLING EVERY 10 SECONDS
+    #         # self.token_list.append(token) FOR POLLING
+    #         self.populate_task_btn(task_id, person_id, task_window_info, token)
+    #         self.row_current += 1
+    #     # self.root.after(10000,self.poll_peo_q)    FOR USE WITH POLLING EVERY 10 SECONDS
+    # def process_tasks(self):
+    #     tasks = self.home.get_tasks(self.device_id)
+    #     self.clear_window()
+    #     self.set_home()
+    #     for i in tasks:
+    #         print('device_out = ', i)
+    #         for ii in tasks[i]:
+    #             print('  ', ii, tasks[i][ii])
+    #             self.send_data(ii, tasks[i][ii])
+    #     if self.at_home:
+    #         self.root.after(10000, self.process_tasks)
+    def poll_controller(self):
+        tasks = self.home.get_tasks(self.device_id)
+        if tasks:
+            if self.at_home:
+                self.clear_window()
+                self.set_home()
+            for task in tasks:
+                if self.at_home:
+                    self.send_data(task, tasks.get(task))
+
+        self.root.after(1000, self.poll_controller)
+
+    # def refresh_home(self):
+    #     tasks = self.home.get_tasks(self.device_id)
+    #     if tasks:
+    #         self.clear_window()
+    #         self.set_home()
+    #         for task in tasks:
+    #             self.send_data(task, tasks.get(task))
+    def send_data(self, token, raw_data):
+
+        # if [token,raw_data] not in self.token_list:
+        #     self.token_list.append([token,raw_data])
+        if self.at_home:
+            task_id = raw_data[3]
+            person_id = raw_data[0]
+            task_window_info = raw_data[5]
             self.populate_task_btn(task_id, person_id, task_window_info, token)
-            self.row_current += 1
-        # self.root.after(10000,self.poll_peo_q)    FOR USE WITH POLLING EVERY 10 SECONDS
+            self.row_current+=1
 
     def populate_task_btn(self, task_id, person_id, task_window_info, token):
         """This function adds the buttons for the staffer's task to the task window.
@@ -91,6 +136,7 @@ class manage_window:
                                     command=lambda: self.write_task_screen(task_window_info, person_id, token, task_id),
                                     fg="black", bg="gray", height=1, width=10)
         btn_action.grid(column=2, row=self.row_current, ipadx=self.row_padding)
+        self.row_current+=1
 
     def set_home(self):
         """This function sets up the home screen for the staffer"""
@@ -98,7 +144,6 @@ class manage_window:
         staff_name = Label(self.window, text=self.staff_name, font=data.get_large_font())
         staff_name.grid(column=0, row=0)
         self.add_column_headers()
-        self.poll_peo_q()
 
     def add_column_headers(self):
         """This function adds the headers for the tasks in the home screen (name     task)"""
@@ -113,7 +158,7 @@ class manage_window:
         :param person_id: identification number of the person
         :type person_id: int
         """
-        name = data.get_data('pdata', 2, person_id, 9, '~1')[0][11]
+        name = data.get_data('pdata', 2, int(person_id), 9, '~1')[0][11]
         label_name = Label(self.window, text=name, font=data.medium_font)
         label_name.grid(column=1, row=self.row_current, ipady=self.row_padding)
 
@@ -147,7 +192,7 @@ class manage_window:
             elif item[0] == 'CheckBoxes':
                 self.add_check_boxes(item[1:])
             elif item[0] == 'Button':
-                self.add_button_submit(item[1])
+                self.add_button_submit(item[1], token)
 
     def clear_window(self):
         """This function clears the window that it is given allowing it to be a blank canvas before the window
@@ -165,7 +210,7 @@ class manage_window:
         """
         lbl = Label(self.window, text=ld.get_text_from_dict(self.language, value) + ': ', font=data.medium_font)
         lbl.grid(row=self.task_row, column=0, ipady=self.row_padding, sticky='W')
-        dict_token = data.get_data('pdata', 2, person_id, 9, value)[0].__getitem__(11)
+        dict_token = data.get_data('pdata', 2, int(person_id), 9, value)[0].__getitem__(11)
 
         lbl_info = Label(self.window, text=ld.get_text_from_dict(self.language, dict_token))
 
@@ -179,15 +224,22 @@ class manage_window:
         """
         drop_down_lbl = value[0]
         list_call = value[1]
+        print(list_call)
         lbl = Label(self.window, text=ld.get_text_from_dict(self.language, drop_down_lbl) + ': ', font=data.medium_font)
         lbl.grid(row=self.task_row, column=0, ipady=self.row_padding, sticky='W')
-        choices = data.get_data('choices').get(list_call)
+        choices = pe_data.choices.get(list_call)
         choices_formatted = []
         choice_dict = {}
-        for choice in choices:
-            choices_formatted.append(ld.get_text_from_dict(self.language, choice[0]))
-            choice_dict[ld.get_text_from_dict(self.language, choice[0])] = choice[0]
-
+        for choice in choices:#short list
+            if choice[1]:
+                choices_formatted.append(ld.get_text_from_dict(self.language, choice[0]))
+                choice_dict[ld.get_text_from_dict(self.language, choice[0])] = choice[0]
+        if list_call == 'c102':
+            choices_formatted.append('_____________')
+        for choice in choices:#long list
+            if list_call == 'c102':
+                choices_formatted.append(ld.get_text_from_dict(self.language, choice[0]))
+                choice_dict[ld.get_text_from_dict(self.language, choice[0])] = choice[0]
         option = StringVar(self.window)
         drop_down = OptionMenu(self.window, option, *choices_formatted)
         drop_down.grid(row=self.task_row, column=1, sticky='W')
@@ -195,18 +247,18 @@ class manage_window:
         self.widgets.append((drop_down_lbl, option, choice_dict))
         self.task_row += 1
 
-    def add_button_submit(self, value):
+    def add_button_submit(self, value, token):
         """this method adds a submit button to a given window
         :param value: a dictionary reference to a value that needs to be written in the form a label to the screen
         :type value: str
         """
         btn_submit = Button(self.window, text=ld.get_text_from_dict(self.language, value),
-                            command=lambda: self.submit_btn_listener(),
+                            command=lambda: self.submit_btn_listener(token),
                             fg="black", bg="gray", height=1, width=10)
         btn_submit.grid(row=self.task_row + 5, column=0, sticky='S')
         self.task_row += 1
 
-    def submit_btn_listener(self):
+    def submit_btn_listener(self, token):
         """an action listener for the submit button.  As it stands, it only takes the staffer back to their home screen
         but this is where the addition of data to pdata and the log will go
         """
@@ -216,8 +268,9 @@ class manage_window:
         self.add_to_log()
         self.value_holder.clear()
         self.token = None
-        # self.at_home = True   FOR USE WITH POLLING PEO_Q
+        self.at_home = True
         self.set_home()
+        self.home.return_data(token)
 
     def add_to_log(self):
         """This function adds the data that will be sent back to the protocol manager to the log window
@@ -270,7 +323,7 @@ class manage_window:
         :param value: a dictionary reference to a value that needs to be written in the form a label to the screen
         :type value: str
         """
-        phone_number = data.get_data('pdata', 2, person_id, 9, value)[0].__getitem__(11)
+        phone_number = data.get_data('pdata', 2, int(person_id), 9, value)[0].__getitem__(11)
         lbl = Label(self.window, text=ld.get_text_from_dict(self.language, value) + ': ', font=data.medium_font)
         lbl.grid(row=self.task_row, column=0, ipady=self.row_padding, sticky='W')
         text_entered = StringVar()

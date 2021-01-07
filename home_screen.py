@@ -1,6 +1,10 @@
 from tkinter import *
 import data
 from manage_window import manage_window
+import datetime
+import time
+import pe
+import PEv1_data as PEd
 
 
 class home_screen:
@@ -30,7 +34,10 @@ class home_screen:
     :param self.lab_tech_home: the window that holds a reference to the lab tech's window
     :type self.reception_home: tk Window"""
 
-    def __init__(self, master, log_window):
+    def __init__(self, master, log_window,controller):
+        self.opening_time = 1609340400
+        self.controller = controller
+        self.sim_start_time = 0
         self.root = master
         self.horizontal_spacing = 0
         self.log_window_pointer = log_window
@@ -39,6 +46,8 @@ class home_screen:
         self.row_current = 2
         self.task_row = 0
         self.staff_windows = []
+        self.staff_dict = {}
+        self.loop_count =0
 
     def create_home_screen(self, v):
         """In charge of the creation of a new window to be displayed on the screen
@@ -51,19 +60,35 @@ class home_screen:
         self.horizontal_spacing += 270
         return home
 
-    def manage_staff_main_screen(self):
+    def manage_staff_main_screen(self, home):
         """This method populates the various staff screens, in reference to NOTE 1 above I believe this can be
         simplified so there are not multiple methods to create the various home screen"""
-        staff_window_ids = data.get_data('staff_device')
-        staffers = data.get_data('staffers')
+        staff_window_ids = PEd.staff_device
+        staffers = PEd.staffers
         for staff in staffers:
-            for window in staff_window_ids:
-                if not window.get(staff[0]) is None:
-                    device_id = window.get(staff[0])
-            self.staff_windows.append(manage_window(self.create_home_screen('+150'), staff, self.log_window_pointer,
-                                                    device_id, self.root))
+            device_id = staff_window_ids.get(staff)
+            self.staff_dict[device_id]=manage_window(self.create_home_screen('+150'), staffers.get(staff), self.log_window_pointer,
+                                                    device_id, self.root,home)
+            self.staff_dict[device_id].set_home()
+            self.staff_dict[device_id].poll_controller()
 
-        for win in self.staff_windows: # makes a call to set the home windows for all of the staffers
-            win.set_home()
+    def get_tasks(self,device_id):
+        # print('========GET TASK FUN+++++++++++++')
+        # print(self.controller.poll_tasks(device_id))
+        return self.controller.poll_tasks(device_id)
+
+    def user_interface(self, pe_outs):
+        # d_out = None
+        token_ = None
+        # token = None
+        print('Current tasks (pe_outs) by device')
+        for i in pe_outs:
+            print('device_out = ', i)
+            for ii in pe_outs[i]:
+                print('  ', ii, pe_outs[i][ii])
+                self.staff_dict.get(i).send_data(ii, pe_outs[i][ii])
+
+    def return_data(self, token):
+        self.controller.return_completion(token,datetime.datetime.now().timestamp())
 
 
